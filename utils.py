@@ -33,7 +33,7 @@ def split_audio(input_file, output_dir, chunk_duration=30 * 60):
     os.makedirs(split_audio_dir, exist_ok=True)
 
     # Use the bundled ffmpeg binary
-    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg.exe")
+    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg")
     command = [
         ffmpeg_path, "-i", input_file, "-f", "segment", "-segment_time", str(chunk_duration),
         "-c", "libmp3lame", os.path.join(split_audio_dir, "split_audio_%03d.mp3")
