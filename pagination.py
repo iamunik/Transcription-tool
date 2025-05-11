@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 
 ffmpeg_dir = os.path.join(os.path.dirname(__file__), "bin")
 os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
