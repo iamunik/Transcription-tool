@@ -5,6 +5,7 @@ import zipfile
 import streamlit as st
 import os
 import base64
+import stat
 
 
 def open_picture(image_name):
