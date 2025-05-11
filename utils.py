@@ -34,16 +34,27 @@ def split_audio(input_file, output_dir, chunk_duration=30 * 60):
 
     # Use the bundled ffmpeg binary
     ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg")
+
+    # Ensure ffmpeg is executable (fixes PermissionError on Streamlit Cloud)
+    try:
+        st_mode = os.stat(ffmpeg_path).st_mode
+        os.chmod(ffmpeg_path, st_mode | stat.S_IEXEC)
+    except Exception as e:
+        st.error(f"Could not set execute permission on ffmpeg: {e}")
+        return False
+
     command = [
         ffmpeg_path, "-i", input_file, "-f", "segment", "-segment_time", str(chunk_duration),
         "-c", "libmp3lame", os.path.join(split_audio_dir, "split_audio_%03d.mp3")
     ]
+
     try:
         subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, text=True)
     except subprocess.CalledProcessError as e:
         st.error(f"Error splitting audio: {e}")
         st.error(f"FFmpeg error output: {e.stderr}")
         return False
+
     return True
 
 
