@@ -15,6 +15,9 @@ from utils import (
 TEMP_DIR = "debug_temp_dir"
 MODEL_DIR = "whisper_models"
 
+ffmpeg_dir = os.path.join(os.path.dirname(__file__), "bin")
+os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
+
 # Ensure directories exist
 os.makedirs(TEMP_DIR, exist_ok=True)
 os.makedirs(MODEL_DIR, exist_ok=True)
