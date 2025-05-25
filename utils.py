@@ -65,6 +65,8 @@ def compress_audio(input_file, output_file, bitrate="48k"):
         ffmpeg_path, "-i", input_file, "-b:a", bitrate, "-threads", "1", output_file
     ]
     try:
+        st_mode = os.stat(ffmpeg_path).st_mode
+        os.chmod(ffmpeg_path, st_mode | stat.S_IEXEC)
         subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, text=True)
     except subprocess.CalledProcessError as e:
         st.error(f"Error compressing audio: {e.stderr}")
