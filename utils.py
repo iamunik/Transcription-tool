@@ -60,7 +60,7 @@ def compress_audio(input_file, output_file, bitrate="48k"):
     """
     Compress the audio file to reduce its size using ffmpeg.
     """
-    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg.exe")
+    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg")
     command = [
         ffmpeg_path, "-i", input_file, "-b:a", bitrate, "-threads", "1", output_file
     ]
