@@ -36,7 +36,7 @@ def split_audio(input_file, output_dir, chunk_duration=300):
     """
     split_audio_dir = os.path.join(output_dir, "split_audios")
     os.makedirs(split_audio_dir, exist_ok=True)
-    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg.exe")
+    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg")
     try:
         st_mode = os.stat(ffmpeg_path).st_mode
         os.chmod(ffmpeg_path, st_mode | stat.S_IEXEC)
