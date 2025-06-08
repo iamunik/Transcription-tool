@@ -11,8 +11,10 @@ os.makedirs(MODEL_DIR, exist_ok=True)
 
 
 def main():
-    st.set_page_config(page_title="Transcription Tool", layout="wide")
-    st.title("TBOG LOVES SEUN VERY MUCH TRANSCRIPTION TOOL")
+    st.set_page_config(page_title="Transcription Tool",
+                       page_icon="🎙️",
+                       layout="wide")
+    st.title("TRANSCRIPTION TOOL")
 
     model = load_and_save_model(model_dir=MODEL_DIR)
     tabs = ["YouTube Link", "Upload Audio"]
