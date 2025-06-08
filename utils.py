@@ -10,6 +10,15 @@ import gc
 
 
 def open_picture(image_name):
+    """
+    Loads an image file from the `image` subdirectory, encodes it in base64, and returns the encoded string.
+
+    Args:
+        image_name (str): The filename of the image to load.
+
+    Returns:
+        str: The base64-encoded string of the image file contents.
+    """
     cwd = os.path.dirname(__file__)
     image_path = os.path.join(cwd, "image", image_name)
     image_path = os.path.abspath(image_path)
@@ -19,6 +28,20 @@ def open_picture(image_name):
 
 
 def create_zip_file(folder_path: str, zip_name: str, output_dir: str = ".") -> str:
+    """
+    Creates a zip archive from the contents of a specified folder.
+
+    Args:
+        folder_path (str): Path to the folder whose contents will be zipped.
+        zip_name (str): Name for the resulting zip file (without extension).
+        output_dir (str, optional): Directory where the zip file will be saved. Defaults to current directory.
+
+    Returns:
+        str: The path to the created zip file.
+
+    The function walks through all files and subfolders in `folder_path`, adds them to a zip archive,
+    and preserves the folder structure relative to `folder_path`. The resulting zip file is saved in `output_dir`.
+    """
     zip_path = os.path.join(output_dir, f"{zip_name}.zip")
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(folder_path):
@@ -30,6 +53,20 @@ def create_zip_file(folder_path: str, zip_name: str, output_dir: str = ".") -> s
 
 
 def split_audio(input_file, output_dir, chunk_duration=300):
+    """
+    Splits an audio file into smaller chunks of a specified duration using FFmpeg.
+
+    Args:
+        input_file (str): Path to the input audio file.
+        output_dir (str): Directory where the split audio chunks will be saved.
+        chunk_duration (int, optional): Duration of each chunk in seconds. Defaults to 300 (5 minutes).
+
+    Returns:
+        bool: True if splitting was successful, False otherwise.
+
+    The function creates a subdirectory for split audio files, ensures FFmpeg is executable,
+    and uses FFmpeg to segment the audio. Errors are reported via Streamlit.
+    """
     split_audio_dir = os.path.join(output_dir, "split_audios")
     os.makedirs(split_audio_dir, exist_ok=True)
     ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg")
@@ -54,6 +91,19 @@ def split_audio(input_file, output_dir, chunk_duration=300):
 
 
 def compress_audio(input_file, output_file, bitrate="48k"):
+    """
+        Compresses an audio file to a specified bitrate using FFmpeg.
+
+        Args:
+            input_file (str): Path to the input audio file.
+            output_file (str): Path where the compressed audio will be saved.
+            bitrate (str, optional): Target audio bitrate (e.g., "48k"). Defaults to "48k".
+
+        Returns:
+            str or None: Path to the compressed audio file if successful, otherwise None.
+
+        The function ensures FFmpeg is executable, runs the compression command, and checks for errors.
+        """
     ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg")
     command = [
         ffmpeg_path, "-i", input_file, "-b:a", bitrate, "-threads", "1", output_file
@@ -72,6 +122,18 @@ def compress_audio(input_file, output_file, bitrate="48k"):
 
 
 def handle_youtube_link(youtube_url, temp_dir):
+    """
+    Downloads audio from a YouTube URL using yt-dlp and saves it as an m4a file in the specified temporary directory.
+
+    Args:
+        youtube_url (str): The YouTube video URL to download audio from.
+        temp_dir (str): The directory where the downloaded audio file will be saved.
+
+    Returns:
+        str or None: The path to the downloaded audio file if successful, otherwise None.
+
+    The function validates the YouTube URL, attempts to download the audio, and handles errors via Streamlit.
+    """
     if not youtube_url.startswith("https://www.youtube.com"):
         st.error("Invalid YouTube URL. Please provide a valid YouTube link.")
         return None
@@ -98,6 +160,17 @@ def handle_youtube_link(youtube_url, temp_dir):
 
 
 def handle_audio_upload(uploaded_file, temp_dir, file_type):
+    """
+        Saves an uploaded audio file to a temporary directory with the specified file type.
+
+        Args:
+            uploaded_file: The uploaded file object from Streamlit.
+            temp_dir (str): Directory where the temporary file will be saved.
+            file_type (str): The file extension/type (e.g., 'mp3', 'wav').
+
+        Returns:
+            str or None: Path to the saved temporary audio file, or None if upload is invalid.
+    """
     if uploaded_file is None or uploaded_file.size == 0:
         st.error("Invalid file upload.")
         return None
@@ -108,6 +181,19 @@ def handle_audio_upload(uploaded_file, temp_dir, file_type):
 
 
 def process_and_transcribe_chunks(model, split_audio_folder, output_folder, progress, total_chunks):
+    """
+    Processes and transcribes audio chunks in a specified folder using a given model.
+
+    Args:
+        model: The transcription model to use for transcribing audio chunks.
+        split_audio_folder (str): Path to the folder containing split audio chunk files.
+        output_folder (str): Directory where the transcription results will be saved.
+        progress: Streamlit progress bar object for updating progress.
+        total_chunks (int): Total number of audio chunks to process.
+
+    Returns:
+        str: Path to the directory containing the full transcription file.
+    """
     transcription_dir = os.path.join(output_folder, "transcriptions")
     os.makedirs(transcription_dir, exist_ok=True)
     output_file = os.path.join(transcription_dir, "full_transcript.txt")
@@ -154,6 +240,18 @@ def process_and_transcribe_chunks(model, split_audio_folder, output_folder, prog
 
 
 def process_audio_input(input_type, input_data, model, session_temp_dir):
+    """
+        Handles audio input from either a YouTube link or an uploaded file, processes it (download/upload, compress, split), and transcribes the audio using the provided model.
+
+        Args:
+            input_type (str): Type of input, either "YouTube" or "Upload".
+            input_data: The YouTube URL (str) or uploaded file object.
+            model: The transcription model to use.
+            session_temp_dir (str): Directory for storing temporary files during processing.
+
+        Returns:
+            str or None: Path to the directory containing the transcription results, or None if processing fails.
+    """
     status = st.empty()
     if input_type == "YouTube":
         status.info("Downloading audio from YouTube...")
