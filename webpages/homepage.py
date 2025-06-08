@@ -3,12 +3,14 @@ from utils import open_picture
 
 st.set_page_config(
     page_title="Transcription Tool",
-    page_icon="🎙️",
+    page_icon="❤",
     layout="wide"
 )
 
-st.title("Welcome to the TBOG ❤ SEUN VERY MUCH TRANSCRIPTION TOOL")
-st.markdown("### 🎙️ Convert audio files or YouTube videos into text effortlessly! 🚀")
+st.title("Welcome to the TBOG ❤ SEUN Audio Transcription Tool")
+st.markdown("""### 🎙️ Transform your audio and video content into accurate, readable text in just a few clicks! Whether
+            you’re a podcaster, journalist, student, or content creator, our tool makes transcription fast, private,
+            and effortless. 🚀""")
 st.markdown(f"""
 <img style="border: 2px solid powderblue" src="data:image/jpeg;base64,{open_picture("transcription_banner.jpg")}" 
 width="80%"><br>""", unsafe_allow_html=True)
@@ -46,7 +48,7 @@ st.markdown("""
 
 ---
 
-### 💡 Tips
+### 💡 Pro Tips
 
 - For best results, use high-quality audio.
 - Ensure your YouTube video is not age-restricted or private.
