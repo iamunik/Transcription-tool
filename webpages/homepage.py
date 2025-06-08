@@ -10,8 +10,8 @@ st.set_page_config(
 st.title("Welcome to the TBOG ❤ SEUN VERY MUCH TRANSCRIPTION TOOL")
 st.markdown("### 🎙️ Convert audio files or YouTube videos into text effortlessly! 🚀")
 st.markdown(f"""
-<img style="border: 2px solid powderblue" src="data:image/jpeg;base64,{open_picture("transcription_banner.jpg")}" width="60%"><br>
-""", unsafe_allow_html=True)
+<img style="border: 2px solid powderblue" src="data:image/jpeg;base64,{open_picture("transcription_banner.jpg")}" 
+width="80%"><br>""", unsafe_allow_html=True)
 
 st.markdown("""
 ### 🌟 Key Features
