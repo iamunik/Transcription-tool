@@ -32,7 +32,7 @@ def create_zip_file(folder_path: str, zip_name: str, output_dir: str = ".") -> s
 def split_audio(input_file, output_dir, chunk_duration=300):
     split_audio_dir = os.path.join(output_dir, "split_audios")
     os.makedirs(split_audio_dir, exist_ok=True)
-    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg.exe")
+    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg")
     try:
         st_mode = os.stat(ffmpeg_path).st_mode
         os.chmod(ffmpeg_path, st_mode | stat.S_IEXEC)
@@ -54,7 +54,7 @@ def split_audio(input_file, output_dir, chunk_duration=300):
 
 
 def compress_audio(input_file, output_file, bitrate="48k"):
-    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg.exe")
+    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg")
     command = [
         ffmpeg_path, "-i", input_file, "-b:a", bitrate, "-threads", "1", output_file
     ]
