@@ -8,16 +8,14 @@ st.set_page_config(
 )
 
 st.title("Welcome to the TBOG ❤ SEUN Audio Transcription Tool")
-st.markdown("""### 🎙️ Transform your audio and video content into accurate, readable text in just a few clicks! Whether
-            you’re a podcaster, journalist, student, or content creator, our tool makes transcription fast, private,
-            and effortless. 🚀""")
+st.write("""🎙️ Transform your audio and YouTube video content into accurate, readable text in just a few clicks!
+            our tool makes transcription fast, private, and effortless. 🚀""")
 st.markdown(f"""
 <img style="border: 2px solid powderblue" src="data:image/jpeg;base64,{open_picture("transcription_banner.jpg")}" 
 width="80%"><br>""", unsafe_allow_html=True)
 
 st.markdown("""
 ### 🌟 Key Features
-
 - 🎯 **Fast and Accurate**: Uses advanced machine learning models for high-quality transcription.
 - 🎧 **Multiple Input Formats**: Supports MP3, WAV, M4A, and OPUS files.
 - 📺 **YouTube Support**: Paste a YouTube link to download and transcribe the audio directly.
