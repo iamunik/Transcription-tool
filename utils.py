@@ -10,6 +10,9 @@ import gc
 import re
 
 
+ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg.exe")
+
+
 def is_youtube_link(url):
     """
     Checks if the provided URL is a valid YouTube link.
@@ -185,6 +188,7 @@ def handle_youtube_link(youtube_url, temp_dir):
             "-o", temp_audio_path,
             "-R", "3",
             "--no-playlist",
+            "--ffmpeg-location", ffmpeg_path,
             "--progress-template", "download:[download] %(progress)s",
             "--newline",
             "--progress",
