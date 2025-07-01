@@ -7,6 +7,21 @@ import base64
 import stat
 import tempfile
 import gc
+import re
+
+
+def is_youtube_link(url):
+    """
+    Checks if the provided URL is a valid YouTube link.
+
+    Args:
+        url (str): The URL to check.
+
+    Returns:
+        bool: True if the URL is a valid YouTube link, False otherwise.
+    """
+    pattern = r"(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/"
+    return re.match(pattern, url) is not None
 
 
 def open_picture(image_name):
@@ -69,7 +84,7 @@ def split_audio(input_file, output_dir, chunk_duration=300):
     """
     split_audio_dir = os.path.join(output_dir, "split_audios")
     os.makedirs(split_audio_dir, exist_ok=True)
-    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg")
+    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg.exe")
     try:
         st_mode = os.stat(ffmpeg_path).st_mode
         os.chmod(ffmpeg_path, st_mode | stat.S_IEXEC)
@@ -104,7 +119,7 @@ def compress_audio(input_file, output_file, bitrate="48k"):
 
         The function ensures FFmpeg is executable, runs the compression command, and checks for errors.
         """
-    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg")
+    ffmpeg_path = os.path.join(os.path.dirname(__file__), "bin", "ffmpeg.exe")
     command = [
         ffmpeg_path, "-i", input_file, "-b:a", bitrate, "-threads", "1", output_file
     ]
@@ -121,9 +136,69 @@ def compress_audio(input_file, output_file, bitrate="48k"):
     return output_file
 
 
+# def handle_youtube_link(youtube_url, temp_dir):
+#     """
+#     Downloads audio from a YouTube URL using yt-dlp and saves it as an m4a file in the specified temporary directory.
+#
+#     Args:
+#         youtube_url (str): The YouTube video URL to download audio from.
+#         temp_dir (str): The directory where the downloaded audio file will be saved.
+#
+#     Returns:
+#         str or None: The path to the downloaded audio file if successful, otherwise None.
+#
+#     The function validates the YouTube URL, attempts to download the audio, and handles errors via Streamlit.
+#     """
+#     if not is_youtube_link(youtube_url):
+#         st.error("Invalid YouTube URL. Please provide a valid YouTube link.")
+#         return None
+#     temp_audio_path = os.path.join(temp_dir, "video_audio.m4a")
+#     try:
+#         command = [
+#             "yt-dlp",
+#             "--extract-audio",
+#             "--audio-format", "m4a",
+#             "--audio-quality", "0",
+#             "-o", temp_audio_path,
+#             "-R", "3",
+#             "--no-playlist",
+#             youtube_url
+#         ]
+#         subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+#         if not os.path.exists(temp_audio_path):
+#             st.error("Failed to download audio. File not found.")
+#             return None
+#     except subprocess.CalledProcessError as e:
+#         st.error(f"Failed to download audio from YouTube: {e.stderr}")
+#         return None
+#     return temp_audio_path
+
+
+def create_progress_hook(progress_bar):
+    """
+    Returns a progress hook function for yt-dlp downloads that updates a Streamlit progress bar.
+
+    Args:
+        progress_bar: A Streamlit progress bar object to update.
+
+    Returns:
+        function: A hook function to be passed to yt-dlp for progress updates.
+    """
+
+    def progress_hook(d):
+        if d['status'] == 'downloading':
+            total = d.get('total_bytes')
+            downloaded = d.get('downloaded_bytes')
+            if total and downloaded:
+                progress = downloaded / total
+                progress_bar.progress(progress)
+
+    return progress_hook
+
+
 def handle_youtube_link(youtube_url, temp_dir):
     """
-    Downloads audio from a YouTube URL using yt-dlp and saves it as an m4a file in the specified temporary directory.
+    Downloads audio from a YouTube URL with progress tracking using yt-dlp and saves it as an m4a file.
 
     Args:
         youtube_url (str): The YouTube video URL to download audio from.
@@ -131,13 +206,14 @@ def handle_youtube_link(youtube_url, temp_dir):
 
     Returns:
         str or None: The path to the downloaded audio file if successful, otherwise None.
-
-    The function validates the YouTube URL, attempts to download the audio, and handles errors via Streamlit.
     """
-    if not youtube_url.startswith("https://www.youtube.com"):
+    if not is_youtube_link(youtube_url):
         st.error("Invalid YouTube URL. Please provide a valid YouTube link.")
         return None
+
     temp_audio_path = os.path.join(temp_dir, "video_audio.m4a")
+    progress_bar = st.progress(0)
+
     try:
         command = [
             "yt-dlp",
@@ -147,16 +223,52 @@ def handle_youtube_link(youtube_url, temp_dir):
             "-o", temp_audio_path,
             "-R", "3",
             "--no-playlist",
+            "--progress-template", "download:[download] %(progress)s",
+            "--newline",
+            "--progress",
             youtube_url
         ]
-        subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            universal_newlines=True
+        )
+
+        while True:
+            output = process.stdout.readline()
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                if '[download]' in output:
+                    try:
+                        percent = float(output.split('%')[0].split()[-1])
+                        progress_bar.progress(percent / 100)
+                    except (ValueError, IndexError):
+                        pass
+
+        progress_bar.progress(1.0)
+        process.communicate()
+
+        if process.returncode != 0:
+            st.error("Failed to download audio from YouTube")
+            return None
+
         if not os.path.exists(temp_audio_path):
             st.error("Failed to download audio. File not found.")
             return None
-    except subprocess.CalledProcessError as e:
-        st.error(f"Failed to download audio from YouTube: {e.stderr}")
+
+    except Exception as e:
+        st.error(f"Failed to download audio from YouTube: {str(e)}")
         return None
+    finally:
+        progress_bar.empty()
+
     return temp_audio_path
+
 
 
 def handle_audio_upload(uploaded_file, temp_dir, file_type):
@@ -302,7 +414,6 @@ def process_audio_input(input_type, input_data, model, session_temp_dir):
                 transcription_dir = process_and_transcribe_chunks(
                     model, split_audio_folder, session_temp_dir, progress, total_chunks
                 )
-                status.success("Transcription complete!")
                 return transcription_dir
             else:
                 status.error("No audio chunks were generated.")
