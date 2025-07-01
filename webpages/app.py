@@ -26,13 +26,16 @@ def main():
                 youtube_url = st.text_input("Enter YouTube Video URL", placeholder="https://www.youtube.com/watchOG")
                 if st.button("Download and Transcribe"):
                     with st.spinner("Processing YouTube link..."):
-                        transcription_dir = process_audio_input("YouTube", youtube_url, model, session_temp_dir)
+                        transcription_dir = process_audio_input("YouTube",
+                                                                youtube_url, model, session_temp_dir)
                         if transcription_dir:
-                            zip_path = create_zip_file(transcription_dir, "transcription_output", session_temp_dir)
+                            zip_path = create_zip_file(transcription_dir,
+                                                       "transcription_output", session_temp_dir)
                             if os.path.exists(zip_path):
                                 st.success("Transcription completed successfully!")
                                 with open(zip_path, "rb") as f:
-                                    st.download_button("Download Transcription ZIP", f, file_name="transcription_output.zip")
+                                    st.download_button("Download Transcription ZIP", f,
+                                                       file_name="transcription_output.zip")
                             else:
                                 st.error("Failed to create ZIP file.")
 
